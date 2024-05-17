@@ -11,8 +11,8 @@
 #define NUMPIXELS 8
 #define UPDATE_RATE 5
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "ZuHause 2,4 GHz";
+const char* password = "Bergholz2012!";
 const char* serial_number = "MJ-WS-2g4H5i6J7k";
 const int dry = 4095;
 const int wet = 2733;
@@ -22,6 +22,9 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LEDPIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   Serial.begin(115200);
+
+  initializePixels();
+  int wait = createAccessPoint();
 
   dht.begin();
   pixels.begin();
@@ -39,7 +42,19 @@ void loop() {
   //printSensorReadings(soilMoisture, humidity, temperature);
 
   updateValues(temperature, soilMoisture, humidity);
-  delay(UPDATE_RATE * 60000);
+  delay(30000);
+}
+
+int createAccessPoint() {
+  WiFi.mode(WIFI_AP_STA);
+
+  WiFi.softAP(serial_number, "");
+
+  while (WiFi.softAPgetStationNum() == 0) {
+    delay(100);
+  }
+
+  return 1;
 }
 
 void initializePixels() {
@@ -117,7 +132,7 @@ void printSensorReadings(float soilMoisture, float humidity, float temperature) 
   Serial.println(" Grad");
 }
 
-void checkIn(float temperature, float soilMoisture, float humidity) {
+void checkIn() {
   StaticJsonDocument<200> doc;
   doc["station_serial_number"] = String(serial_number);
   doc["station_ssid"] = String(ssid);
